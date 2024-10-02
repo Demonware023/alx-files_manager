@@ -1,7 +1,8 @@
 // controllers/UsersController.js
 
 import sha1 from 'sha1';
-import dbClient from '../utils/db.js';
+import dbClient, { ObjectId } from '../utils/db.js';
+import redisClient from '../utils/redis.js';
 
 class UsersController {
   /**
@@ -51,6 +52,46 @@ class UsersController {
       return res.status(201).json(responseUser);
     } catch (error) {
       console.error('Error in postNew:', error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+
+  /**
+   * Handles the GET /users/me endpoint.
+   * Retrieves the authenticated user's information based on the token.
+   */
+  static async getMe(req, res) {
+    try {
+      const { 'x-token': token } = req.headers;
+
+      if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const redisKey = `auth_${token}`;
+
+      // Retrieve the user ID from Redis
+      const userId = await redisClient.get(redisKey);
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      // Find the user in the database
+      const usersCollection = dbClient.db.collection('users');
+      const user = await usersCollection.findOne({ _id: ObjectId(userId) });
+
+      if (!user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      // Return the user information (email and id)
+      return res.status(200).json({
+        id: user._id.toString(),
+        email: user.email,
+      });
+    } catch (error) {
+      console.error('Error in getMe:', error);
       return res.status(500).json({ error: 'Internal Server Error' });
     }
   }
