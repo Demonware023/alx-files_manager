@@ -1,18 +1,33 @@
-// routes/index.js
-
 import { Router } from 'express';
-import AppController from '../controllers/AppController.js';
-import UsersController from '../controllers/UsersController.js';
+import AppController from '../controllers/AppController';
+import UsersController from '../controllers/UsersController';
+import AuthController from '../controllers/AuthController';
+import FilesController from '../controllers/FilesController';
 
 const router = Router();
 
-// Define the /status endpoint
 router.get('/status', AppController.getStatus);
 
-// Define the /stats endpoint
 router.get('/stats', AppController.getStats);
 
-// Define the /users endpoint for creating new users
 router.post('/users', UsersController.postNew);
 
-export default router;
+router.get('/connect', AuthController.getConnect);
+
+router.get('/disconnect', AuthController.getDisconnect);
+
+router.get('/users/me', UsersController.getMe);
+
+router.post('/files', FilesController.postUpload);
+
+router.get('/files/:id', FilesController.getShow);
+
+router.get('/files', FilesController.getIndex);
+
+router.put('/files/:id/publish', FilesController.putPublish);
+
+router.put('/files/:id/unpublish', FilesController.putUnpublish);
+
+router.get('/files/:id/data', FilesController.getFile);
+
+module.exports = router;

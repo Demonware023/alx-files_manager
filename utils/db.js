@@ -1,6 +1,6 @@
 // utils/db.js
 
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 class DBClient {
   constructor() {
@@ -34,7 +34,7 @@ class DBClient {
    * @returns {boolean} True if connected, false otherwise.
    */
   isAlive() {
-    return this.client && this.client.isConnected();
+    return this.client && this.client.topology && this.client.topology.isConnected();
   }
 
   /**
@@ -74,7 +74,5 @@ class DBClient {
   }
 }
 
-// Create and export an instance of DBClient
 const dbClient = new DBClient();
-
-export default dbClient;
+export { dbClient, ObjectId };
